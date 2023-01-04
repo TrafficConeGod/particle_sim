@@ -1,5 +1,6 @@
 #include "shader.h"
 #include "gfx.h"
+#include "sim.h"
 #include <stdio.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -44,9 +45,11 @@ int main() {
     }
     glUseProgram(shader_program);
 
-    gfx_main();
+    sim_init();
+    gfx_init();
 
     for (;;) {
+        sim_update();
         gfx_update();
 
         glfwSwapBuffers(win);

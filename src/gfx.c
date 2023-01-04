@@ -1,11 +1,6 @@
 #include "gfx.h"
 #include "util.h"
-#include <cglm/struct/vec2.h>
-#include <stdalign.h>
-
-#define TILEMAP_WIDTH 160
-#define TILEMAP_HEIGHT 90
-#define NUM_TILES (TILEMAP_WIDTH * TILEMAP_HEIGHT)
+#include "tilemap.h"
 
 #define NUM_TILE_QUAD_VERTS 6
 
@@ -20,7 +15,7 @@ typedef struct color_quad {
 // Stored in row major order
 
 _Alignas(64) static pos_quad_t pos_quads[NUM_TILES];
-_Alignas(64) static color_quad_t color_quads[NUM_TILES];
+_Alignas(64) static color_quad_t color_quads[NUM_TILES] = {0};
 
 static union {
     GLuint data[2];
@@ -34,7 +29,7 @@ static vec2s convert_normalization(vec2s vec) {
     return (vec2s){{ (2.0f * vec.x) - 1.0f, (2.0f * vec.y) - 1.0f }};
 }
 
-static void fill_vertex_buffers(void) {
+static void fill_quad_arrays(void) {
     size_t i = 0;
 
     float x_step = 2.0f * (1.0f / (float)TILEMAP_WIDTH);
@@ -70,8 +65,8 @@ static void fill_vertex_buffers(void) {
     }
 }
 
-void gfx_main(void) {
-    fill_vertex_buffers();
+void gfx_init(void) {
+    fill_quad_arrays();
 
     glGenBuffers(SIZEOF_ARRAY(buffers.data), buffers.data);
 
