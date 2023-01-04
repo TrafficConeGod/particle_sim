@@ -1,5 +1,6 @@
 #include "sim.h"
 #include "tilemap.h"
+#include "particle.h"
 #include "gfx.h"
 #include <stdalign.h>
 #include <stddef.h>
@@ -21,23 +22,38 @@ _Static_assert(sizeof(tile_type_t) == 1, "tile_type_t must be 1 byte");
 
 _Alignas(64) static tile_type_t tile_types[NUM_TILES] = {0};
 
-void sim_init(void) {
-
+bool catch_index(size_t index) {
+    return index >= NUM_TILES;
 }
 
-static size_t x = 0;
-static size_t y = 0;
-static size_t index = 0;
+void sim_init(void) {
+    for (size_t i = TILEMAP_WIDTH * (TILEMAP_HEIGHT - 3); i < TILEMAP_WIDTH * (TILEMAP_HEIGHT - 2); i++) {
+        tile_types[i] = tile_type_sand;
+        pixel_colors[i] = (color_t){ 194, 154, 52 };
+    }
+}
+
+void handle_sand(size_t index) {
+    size_t move_to = index - TILEMAP_WIDTH;
+    if (catch_index(move_to)) {
+        return;
+    }
+    if (tile_types[move_to] != tile_type_air) {
+        return;
+    }
+    tile_types[index] = tile_type_air;
+    tile_types[move_to] = tile_type_sand;
+    pixel_colors[index] = (color_t){ 0, 0, 0 };
+    pixel_colors[move_to] = (color_t){ 194, 154, 52 };
+}
 
 void sim_update(void) {
-    if (x < TILEMAP_WIDTH) {
-        tile_types[index] = tile_type_sand;
-        set_tile_to_color(index, (color_t){ 194, 154, 52 });
-
-        x++;
-        index++;
-    } else if (y < TILEMAP_HEIGHT) {
-        x = 0;
-        y++;
+    for (size_t i = 0; i < NUM_TILES; i++) {
+        switch (tile_types[i]) {
+            default: break;
+            case tile_type_sand:
+                handle_sand(i);
+                break;
+        }
     }
 }

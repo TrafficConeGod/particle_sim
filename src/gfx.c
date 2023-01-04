@@ -1,6 +1,5 @@
 #include "gfx.h"
 #include "util.h"
-#include "tilemap.h"
 #include "shader.h"
 
 // TODO: Use Pixel Buffer Objects
@@ -24,7 +23,7 @@ _Alignas(64) static vec2s uv_verts[] = {
     {{ 1, 0 }}
 };
 
-_Alignas(64) static color_t pixel_colors[NUM_TILES] = {0};
+_Alignas(64) color_t pixel_colors[NUM_TILES] = {0};
 
 static union {
     GLuint data[2];
