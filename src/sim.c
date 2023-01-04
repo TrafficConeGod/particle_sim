@@ -12,16 +12,34 @@
 
 #define GRAVITY 0.01f
 
+static tile_type_t current_tile_type = tile_type_sand;
 _Alignas(64) static tile_type_t tile_types[NUM_TILES] = {0};
 
-bool catch_index(size_t index) {
+static bool catch_index(size_t index) {
     return index >= NUM_TILES;
 }
 
-void sim_init(void) {
+static void key_callback(UNUSED GLFWwindow* _0, int key, UNUSED int _1, UNUSED int _2, UNUSED int _3) {
+    tile_type_t tile_type = (key - GLFW_KEY_1) + 1;
+    if (tile_type > MAX_TILE_TYPE) {
+        return;
+    }
+    current_tile_type = tile_type;
 }
 
-void handle_sand(size_t index) {
+void sim_init(GLFWwindow* win) {
+    glfwSetKeyCallback(win, key_callback);
+}
+
+static color_t get_tile_color(tile_type_t tile_type) {
+    switch (tile_type) {
+        default: return (color_t){ 0, 0, 0 };
+        case tile_type_sand: return (color_t){ 194, 154, 52 };
+        case tile_type_stone: return (color_t){ 76, 79, 79 };
+    }
+}
+
+static void handle_sand(size_t index) {
     // Move down by 1
     size_t move_to = index - TILEMAP_WIDTH;
     // Check if we are in bounds
@@ -44,7 +62,7 @@ void handle_sand(size_t index) {
     tile_types[index] = tile_type_air;
     tile_types[move_to] = tile_type_sand;
     pixel_colors[index] = (color_t){ 0, 0, 0 };
-    pixel_colors[move_to] = (color_t){ 194, 154, 52 };
+    pixel_colors[move_to] = get_tile_color(tile_type_sand);
 }
 
 void sim_update(float width_norm_factor, float height_norm_factor, GLFWwindow* win, UNUSED size_t tick_count) {
@@ -72,7 +90,7 @@ void sim_update(float width_norm_factor, float height_norm_factor, GLFWwindow* w
             return;
         }
         // Spawn sand
-        tile_types[index] = tile_type_sand;
-        pixel_colors[index] = (color_t){ 194, 154, 52 };
+        tile_types[index] = current_tile_type;
+        pixel_colors[index] = get_tile_color(current_tile_type);
     }
 }

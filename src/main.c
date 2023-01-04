@@ -35,7 +35,7 @@ int main() {
     if (gfx_init() != 0) {
         goto error;
     }
-    sim_init();
+    sim_init(win);
 
     size_t tick_count = 0;
 
