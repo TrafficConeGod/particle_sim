@@ -3,25 +3,24 @@
 #include <cglm/struct/vec2.h>
 #include <stdalign.h>
 
-_Alignas(64) static vec2s vert_positions[] = {
-    {{ -1, -1 }},
-    {{ 1, -1 }},
-    {{ -1, 1 }},
-    //
-    {{ 1, 1 }},
-    {{ -1, 1 }},
-    {{ 1, -1 }}
-};
+#define TILEMAP_WIDTH 160
+#define TILEMAP_HEIGHT 90
+#define NUM_TILES (TILEMAP_WIDTH * TILEMAP_HEIGHT)
 
-_Alignas(64) static vec3s vert_colors[] = {
-    {{ 1, 0, 0 }},
-    {{ 1, 0, 0 }},
-    {{ 1, 0, 0 }},
-    //
-    {{ 0, 1, 0 }},
-    {{ 0, 1, 0 }},
-    {{ 0, 1, 0 }}
-};
+#define NUM_TILE_QUAD_VERTS 6
+
+typedef struct pos_quad {
+    vec2s verts[NUM_TILE_QUAD_VERTS];
+} pos_quad_t;
+
+typedef struct color_quad {
+    vec3s verts[NUM_TILE_QUAD_VERTS];
+} color_quad_t;
+
+// Stored in row major order
+
+_Alignas(64) static pos_quad_t pos_quads[NUM_TILES];
+_Alignas(64) static color_quad_t color_quads[NUM_TILES];
 
 static union {
     GLuint data[2];
@@ -31,15 +30,56 @@ static union {
     };
 } buffers;
 
+static vec2s convert_normalization(vec2s vec) {
+    return (vec2s){{ (2.0f * vec.x) - 1.0f, (2.0f * vec.y) - 1.0f }};
+}
+
+static void fill_vertex_buffers(void) {
+    size_t i = 0;
+
+    float x_step = 2.0f * (1.0f / (float)TILEMAP_WIDTH);
+    float y_step = 2.0f * (1.0f / (float)TILEMAP_HEIGHT);
+
+    for (size_t x = 0; x < TILEMAP_WIDTH; x++) {
+        for (size_t y = 0; y < TILEMAP_HEIGHT; y++) {
+            vec2s tile_p0 = convert_normalization((vec2s){{ x / (float)TILEMAP_WIDTH, y / (float)TILEMAP_HEIGHT }});
+            vec2s tile_p1 = {{ tile_p0.x + x_step, tile_p0.y + y_step }};
+
+            pos_quads[i] = (pos_quad_t){{
+                {{ tile_p0.x, tile_p0.y }},
+                {{ tile_p1.x, tile_p0.y }},
+                {{ tile_p0.x, tile_p1.y }},
+                //
+                {{ tile_p1.x, tile_p1.y }},
+                {{ tile_p0.x, tile_p1.y }},
+                {{ tile_p1.x, tile_p0.y }}
+            }};
+
+            color_quads[i] = (color_quad_t){{
+                {{ tile_p0.x, tile_p0.y, 0 }},
+                {{ tile_p0.x, tile_p0.y, 0 }},
+                {{ tile_p0.x, tile_p0.y, 0 }},
+                //
+                {{ tile_p0.x, tile_p0.y, 0 }},
+                {{ tile_p0.x, tile_p0.y, 0 }},
+                {{ tile_p0.x, tile_p0.y, 0 }}
+            }};
+            
+            i++;
+        }
+    }
+}
+
 void gfx_main(void) {
+    fill_vertex_buffers();
 
     glGenBuffers(SIZEOF_ARRAY(buffers.data), buffers.data);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers.pos);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vert_positions), vert_positions, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(pos_quads), pos_quads, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers.color);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vert_colors), vert_colors, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(color_quads), color_quads, GL_STATIC_DRAW);
 }
 
 void gfx_update(void) {
@@ -53,7 +93,7 @@ void gfx_update(void) {
     glBindBuffer(GL_ARRAY_BUFFER, buffers.color);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
-    glDrawArrays(GL_TRIANGLES, 0, SIZEOF_ARRAY(vert_positions));
+    glDrawArrays(GL_TRIANGLES, 0, NUM_TILES * NUM_TILE_QUAD_VERTS);
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);

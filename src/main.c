@@ -17,7 +17,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* win = glfwCreateWindow(1280, 720, "Wireless Buzzer", NULL, NULL);
+    GLFWwindow* win = glfwCreateWindow(1280, 720, "Test", NULL, NULL);
     if (win == NULL) {
         glfwTerminate();
         printf("Failed to open GLFW window\n");
