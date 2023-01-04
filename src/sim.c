@@ -17,6 +17,13 @@
 static bool is_tile_processed_flag_1 = true;
 
 static bitfield_t get_processed_tile_type_bitfield(bitfield_t bitfield) {
+    if (is_tile_processed_flag_1) {
+        return set_bit(bitfield, 7);
+    }
+    return clear_bit(bitfield, 7);
+}
+
+static bitfield_t toggle_processed_flag(bitfield_t bitfield) {
     return toggle_bit(bitfield, 7);
 }
 
@@ -75,18 +82,15 @@ static void handle_water(size_t index, bitfield_t tile_type_bitfield) {
         if (catch_index(move_to) || get_tile_type(tile_types[move_to]) != tile_type_air) {
             move_to = index - dir;
             // Check if we are in bounds or if we are colliding with something else
-            if (catch_index(move_to)) {
-                return;
-            }
-            // Check if we are colliding with something else
-            if (get_tile_type(tile_types[move_to]) != tile_type_air) {
+            if (catch_index(move_to) || get_tile_type(tile_types[move_to]) != tile_type_air) {
+                tile_types[index] = toggle_processed_flag(tile_type_bitfield);
                 return;
             }
         }
     }
     // Tile movement
     tile_types[index] = tile_type_air;
-    tile_types[move_to] = get_processed_tile_type_bitfield(tile_type_bitfield);
+    tile_types[move_to] = toggle_processed_flag(tile_type_bitfield);
     pixel_colors[index] = get_tile_color(tile_type_air);
     pixel_colors[move_to] = get_tile_color(tile_type_water);
 }
@@ -99,18 +103,16 @@ static void handle_sand(size_t index, bitfield_t tile_type_bitfield) {
     size_t move_to = index - TILEMAP_WIDTH;
     // Check if we are in bounds
     if (catch_index(move_to)) {
+        tile_types[index] = toggle_processed_flag(tile_type_bitfield);
         return;
     }
     // Check if we are colliding with something else
     if (get_tile_type(tile_types[move_to]) > tile_type_water) {
         // Move left or right randomly
         move_to += rand() % 2 ? -1 : 1;
-        // Check if we are in bounds
-        if (catch_index(move_to)) {
-            return;
-        }
-        // Check if we are colliding with something else
-        if (get_tile_type(tile_types[move_to]) > tile_type_water) {
+        // Check if we are in bounds or if we are colliding with something else
+        if (catch_index(move_to) || get_tile_type(tile_types[move_to]) > tile_type_air) {
+            tile_types[index] = toggle_processed_flag(tile_type_bitfield);
             return;
         }
     }
@@ -118,8 +120,8 @@ static void handle_sand(size_t index, bitfield_t tile_type_bitfield) {
     tile_type_t replaced_tile_type = tile_types[move_to];
     color_t replaced_color = pixel_colors[move_to];
 
-    tile_types[index] = replaced_tile_type;
-    tile_types[move_to] = get_processed_tile_type_bitfield(tile_type_bitfield);
+    tile_types[index] = get_processed_tile_type_bitfield(replaced_tile_type);
+    tile_types[move_to] = toggle_processed_flag(tile_type_bitfield);
     pixel_colors[index] = replaced_color;
     pixel_colors[move_to] = get_tile_color(tile_type_sand);
 }
@@ -134,7 +136,7 @@ static void spread_acid(size_t index, bitfield_t tile_type_bitfield) {
         return;
     }
     // Set the tile
-    tile_types[index] = get_processed_tile_type_bitfield(tile_type_bitfield);
+    tile_types[index] = tile_type_bitfield;
     pixel_colors[index] = get_tile_color(tile_type_acid);
 }
 
@@ -142,6 +144,7 @@ static void handle_acid(size_t index, bitfield_t tile_type_bitfield) {
     if (is_tile_processed(tile_type_bitfield)) {
         return;
     }
+    tile_type_bitfield = toggle_processed_flag(tile_type_bitfield);
     // Spread the acid by random chance
     if (rand() % 2) {
         spread_acid(index + 1, tile_type_bitfield);
@@ -156,6 +159,12 @@ static void handle_acid(size_t index, bitfield_t tile_type_bitfield) {
 }
 
 void sim_update(float width_norm_factor, float height_norm_factor, GLFWwindow* win, UNUSED size_t tick_count) {
+    // for (size_t i = 0; i < NUM_TILES; i++) {
+    //     if (get_tile_type(tile_types[i]) != tile_type_air && is_tile_processed(tile_types[i])) {
+    //         printf("%d, %ld\n", get_tile_type(tile_types[i]), i);
+    //     }
+    // }
+
     for (size_t i = 0; i < NUM_TILES; i++) {
         bitfield_t tile_type_bitfield = tile_types[i];
         switch (get_tile_type(tile_type_bitfield)) {
@@ -165,8 +174,6 @@ void sim_update(float width_norm_factor, float height_norm_factor, GLFWwindow* w
             case tile_type_acid: handle_acid(i, tile_type_bitfield); break;
         }
     }
-
-    is_tile_processed_flag_1 = !is_tile_processed_flag_1;
 
     bool mouse_button_1_pressed = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
     bool mouse_button_2_pressed = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
@@ -183,12 +190,14 @@ void sim_update(float width_norm_factor, float height_norm_factor, GLFWwindow* w
             size_t index = (cursor_x_floor + rand_range(0, 6) - 3) + ((cursor_y_floor + rand_range(0, 6) - 3) * TILEMAP_WIDTH);
             // Check if we are in bounds
             if (catch_index(index)) {
-                return;
+                continue;
             }
             // Spawn current tile type if we press mouse button 1, delete tile if we press mouse button 2
             tile_type_t tile_type_to_place = mouse_button_1_pressed ? current_tile_type : tile_type_air;
-            tile_types[index] = tile_type_to_place;
+            tile_types[index] = get_processed_tile_type_bitfield(tile_type_to_place);
             pixel_colors[index] = get_tile_color(tile_type_to_place);
         }
     }
+
+    is_tile_processed_flag_1 = !is_tile_processed_flag_1;
 }
