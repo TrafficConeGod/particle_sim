@@ -106,7 +106,9 @@ void sim_update(float width_norm_factor, float height_norm_factor, GLFWwindow* w
         }
     }
 
-    if (glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
+    bool mouse_button_1_pressed = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
+    bool mouse_button_2_pressed = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
+    if (mouse_button_1_pressed || mouse_button_2_pressed) {
         double cursor_x;
         double cursor_y;
         glfwGetCursorPos(win, &cursor_x, &cursor_y);
@@ -120,8 +122,9 @@ void sim_update(float width_norm_factor, float height_norm_factor, GLFWwindow* w
         if (catch_index(index)) {
             return;
         }
-        // Spawn sand
-        tile_types[index] = current_tile_type;
-        pixel_colors[index] = get_tile_color(current_tile_type);
+        // Spawn current tile type if we press mouse button 1, delete tile if we press mouse button 2
+        tile_type_t tile_type_to_place = mouse_button_1_pressed ? current_tile_type : tile_type_air;
+        tile_types[index] = tile_type_to_place;
+        pixel_colors[index] = get_tile_color(tile_type_to_place);
     }
 }
