@@ -177,16 +177,18 @@ void sim_update(float width_norm_factor, float height_norm_factor, GLFWwindow* w
         vec2s cursor_pos = {{ (float)cursor_x * width_norm_factor * (float)TILEMAP_WIDTH, (1.0f - ((float)cursor_y * height_norm_factor)) * (float)TILEMAP_HEIGHT }};
         size_t cursor_x_floor = cursor_pos.x;
         size_t cursor_y_floor = cursor_pos.y;
-        cursor_x_floor += rand_range(0, 6) - 3;
-        cursor_y_floor += rand_range(0, 6) - 3;
-        size_t index = cursor_x_floor + (cursor_y_floor * TILEMAP_WIDTH);
-        // Check if we are in bounds
-        if (catch_index(index)) {
-            return;
+        // Place at most 5 tiles
+        for (size_t i = 0; i < 5; i++) {
+            // Randomized position
+            size_t index = (cursor_x_floor + rand_range(0, 6) - 3) + ((cursor_y_floor + rand_range(0, 6) - 3) * TILEMAP_WIDTH);
+            // Check if we are in bounds
+            if (catch_index(index)) {
+                return;
+            }
+            // Spawn current tile type if we press mouse button 1, delete tile if we press mouse button 2
+            tile_type_t tile_type_to_place = mouse_button_1_pressed ? current_tile_type : tile_type_air;
+            tile_types[index] = tile_type_to_place;
+            pixel_colors[index] = get_tile_color(tile_type_to_place);
         }
-        // Spawn current tile type if we press mouse button 1, delete tile if we press mouse button 2
-        tile_type_t tile_type_to_place = mouse_button_1_pressed ? current_tile_type : tile_type_air;
-        tile_types[index] = tile_type_to_place;
-        pixel_colors[index] = get_tile_color(tile_type_to_place);
     }
 }
