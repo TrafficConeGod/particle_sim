@@ -1,5 +1,7 @@
 #pragma once
 #include <stddef.h>
 
+typedef struct GLFWwindow GLFWwindow;
+
 void sim_init(void);
-void sim_update(size_t tick_count);
+void sim_update(float width_norm_factor, float height_norm_factor, GLFWwindow* win, size_t tick_count);

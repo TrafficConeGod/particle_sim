@@ -30,7 +30,7 @@ int main() {
         goto error;
     }
 
-    glfwSetInputMode(win, GLFW_STICKY_KEYS, GL_TRUE);
+    // glfwSetInputMode(win, GLFW_STICKY_KEYS, GL_TRUE);
 
     if (gfx_init() != 0) {
         goto error;
@@ -40,7 +40,7 @@ int main() {
     size_t tick_count = 0;
 
     for (;;) {
-        sim_update(tick_count);
+        sim_update(1.0f/1280.0f, 1.0f/720.0f, win, tick_count);
         gfx_update();
 
         tick_count++;
