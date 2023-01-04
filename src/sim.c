@@ -50,8 +50,8 @@ static void handle_water(size_t index) {
     }
     // Check if we are colliding with something else
     if (tile_types[move_to] != tile_type_air) {
-        // Move right
-        move_to = index + 1;
+        // Move left or right randomly
+        move_to = index + (rand() % 2 ? -1 : 1);
         // Check if we are in bounds
         if (catch_index(move_to)) {
             return;
