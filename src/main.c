@@ -37,9 +37,13 @@ int main() {
     }
     sim_init();
 
+    size_t tick_count = 0;
+
     for (;;) {
-        sim_update();
+        sim_update(tick_count);
         gfx_update();
+
+        tick_count++;
 
         glfwSwapBuffers(win);
 
