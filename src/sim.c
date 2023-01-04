@@ -38,6 +38,8 @@ static color_t get_tile_color(tile_type_t tile_type) {
         case tile_type_water: return (color_t){ 66, 135, 245 };
         case tile_type_sand: return (color_t){ 194, 154, 52 };
         case tile_type_stone: return (color_t){ 76, 79, 79 };
+        case tile_type_acid:
+        case tile_type_spreadable_acid: return (color_t){ 255, 0, 255 };
     }
 }
 
@@ -97,12 +99,46 @@ static void handle_sand(size_t index) {
     pixel_colors[move_to] = get_tile_color(tile_type_sand);
 }
 
+static void spread_acid(size_t index) {
+    // Check if we are in bounds
+    if (catch_index(index)) {
+        return;
+    }
+    // Check if we are in air
+    if (tile_types[index] == tile_type_air) {
+        return;
+    }
+    // Set the tile
+    tile_types[index] = tile_type_acid;
+    pixel_colors[index] = get_tile_color(tile_type_acid);
+}
+
+static void handle_spreadable_acid(size_t index) {
+    spread_acid(index + 1);
+    spread_acid(index - 1);
+    spread_acid(index + TILEMAP_WIDTH);
+    spread_acid(index - TILEMAP_WIDTH);
+
+    // Delete the tile
+    tile_types[index] = tile_type_air;
+    pixel_colors[index] = get_tile_color(tile_type_air);
+}
+
+static void handle_acid(size_t index) {
+    // Give the acid a chance of becoming spreadable or delete it
+    tile_type_t tile_type = rand() % 2 ? tile_type_spreadable_acid : tile_type_air;
+    tile_types[index] = tile_type;
+    pixel_colors[index] = get_tile_color(tile_type);
+}
+
 void sim_update(float width_norm_factor, float height_norm_factor, GLFWwindow* win, UNUSED size_t tick_count) {
     for (size_t i = 0; i < NUM_TILES; i++) {
         switch (tile_types[i]) {
             default: break;
             case tile_type_water: handle_water(i); break;
             case tile_type_sand: handle_sand(i); break;
+            case tile_type_spreadable_acid: handle_spreadable_acid(i); break;
+            case tile_type_acid: handle_acid(i); break;
         }
     }
 
