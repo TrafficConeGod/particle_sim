@@ -30,8 +30,6 @@ void handle_sand(size_t index) {
     }
     // Check if we are colliding with something else
     if (tile_types[move_to] != tile_type_air) {
-        // Move down by 1
-        move_to -= TILEMAP_WIDTH;
         // Move left or right randomly
         move_to += rand() % 2 ? -1 : 1;
         // Check if we are in bounds
