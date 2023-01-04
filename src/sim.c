@@ -32,7 +32,7 @@ static size_t index = 0;
 void sim_update(void) {
     if (x < TILEMAP_WIDTH) {
         tile_types[index] = tile_type_sand;
-        set_tile_to_color(index, (vec3s){{ 194.0f/255.0f, 154.0f/255.0f, 52.0f/255.0f }});
+        set_tile_to_color(index, (color_t){ 194, 154, 52 });
 
         x++;
         index++;

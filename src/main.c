@@ -1,4 +1,3 @@
-#include "shader.h"
 #include "gfx.h"
 #include "sim.h"
 #include <stdio.h>
@@ -33,20 +32,10 @@ int main() {
 
     glfwSetInputMode(win, GLFW_STICKY_KEYS, GL_TRUE);
 
-    glEnable(GL_CULL_FACE);
-
-    GLuint vert_array;
-    glGenVertexArrays(1, &vert_array);
-    glBindVertexArray(vert_array);
-
-    GLuint shader_program = load_shader_program("shader/vertex.glsl", "shader/fragment.glsl");
-    if (shader_program == (GLuint)-1) {
+    if (gfx_init() != 0) {
         goto error;
     }
-    glUseProgram(shader_program);
-
     sim_init();
-    gfx_init();
 
     for (;;) {
         sim_update();
@@ -64,6 +53,5 @@ int main() {
     error:
         return 1;
     end:
-        glDeleteShader(shader_program);
         return 0;
 }
