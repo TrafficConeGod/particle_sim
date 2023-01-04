@@ -6,6 +6,7 @@
 
 typedef enum tile_type {
     tile_type_air,
+    tile_type_water,
     tile_type_sand,
     tile_type_stone
 } tile_type_t;

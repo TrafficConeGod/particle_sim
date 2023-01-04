@@ -33,10 +33,39 @@ void sim_init(GLFWwindow* win) {
 
 static color_t get_tile_color(tile_type_t tile_type) {
     switch (tile_type) {
-        default: return (color_t){ 0, 0, 0 };
+        default: return (color_t){ 255, 0, 0 };
+        case tile_type_air: return (color_t){ 0, 0, 0 };
+        case tile_type_water: return (color_t){ 66, 135, 245 };
         case tile_type_sand: return (color_t){ 194, 154, 52 };
         case tile_type_stone: return (color_t){ 76, 79, 79 };
     }
+}
+
+static void handle_water(size_t index) {
+    // Move down by 1
+    size_t move_to = index - TILEMAP_WIDTH;
+    // Check if we are in bounds
+    if (catch_index(move_to)) {
+        return;
+    }
+    // Check if we are colliding with something else
+    if (tile_types[move_to] != tile_type_air) {
+        // Move right
+        move_to = index + 1;
+        // Check if we are in bounds
+        if (catch_index(move_to)) {
+            return;
+        }
+        // Check if we are colliding with something else
+        if (tile_types[move_to] != tile_type_air) {
+            return;
+        }
+    }
+    // Tile movement
+    tile_types[index] = tile_type_air;
+    tile_types[move_to] = tile_type_water;
+    pixel_colors[index] = get_tile_color(tile_type_air);
+    pixel_colors[move_to] = get_tile_color(tile_type_water);
 }
 
 static void handle_sand(size_t index) {
@@ -47,7 +76,7 @@ static void handle_sand(size_t index) {
         return;
     }
     // Check if we are colliding with something else
-    if (tile_types[move_to] != tile_type_air) {
+    if (tile_types[move_to] > tile_type_water) {
         // Move left or right randomly
         move_to += rand() % 2 ? -1 : 1;
         // Check if we are in bounds
@@ -55,13 +84,16 @@ static void handle_sand(size_t index) {
             return;
         }
         // Check if we are colliding with something else
-        if (tile_types[move_to] != tile_type_air) {
+        if (tile_types[move_to] > tile_type_water) {
             return;
         }
     }
-    tile_types[index] = tile_type_air;
+    // Tile movement
+    tile_type_t replaced_tile_type = tile_types[move_to];
+    color_t replaced_color = pixel_colors[move_to];
+    tile_types[index] = replaced_tile_type;
     tile_types[move_to] = tile_type_sand;
-    pixel_colors[index] = (color_t){ 0, 0, 0 };
+    pixel_colors[index] = replaced_color;
     pixel_colors[move_to] = get_tile_color(tile_type_sand);
 }
 
@@ -69,9 +101,8 @@ void sim_update(float width_norm_factor, float height_norm_factor, GLFWwindow* w
     for (size_t i = 0; i < NUM_TILES; i++) {
         switch (tile_types[i]) {
             default: break;
-            case tile_type_sand:
-                handle_sand(i);
-                break;
+            case tile_type_water: handle_water(i); break;
+            case tile_type_sand: handle_sand(i); break;
         }
     }
 
