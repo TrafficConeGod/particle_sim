@@ -4,6 +4,8 @@
 #pragma GCC push_options
 #pragma GCC optimize ("short-enums")
 
+// TODO: Add bitfield flag at the end of the enum to check if it has been processed yet
+
 typedef enum tile_type {
     tile_type_air,
     tile_type_water,
