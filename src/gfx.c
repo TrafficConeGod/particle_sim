@@ -35,8 +35,8 @@ static void fill_quad_arrays(void) {
     float x_step = 2.0f * (1.0f / (float)TILEMAP_WIDTH);
     float y_step = 2.0f * (1.0f / (float)TILEMAP_HEIGHT);
 
-    for (size_t x = 0; x < TILEMAP_WIDTH; x++) {
-        for (size_t y = 0; y < TILEMAP_HEIGHT; y++) {
+    for (size_t y = 0; y < TILEMAP_HEIGHT; y++) {
+        for (size_t x = 0; x < TILEMAP_WIDTH; x++) {
             vec2s tile_p0 = convert_normalization((vec2s){{ x / (float)TILEMAP_WIDTH, y / (float)TILEMAP_HEIGHT }});
             vec2s tile_p1 = {{ tile_p0.x + x_step, tile_p0.y + y_step }};
 
@@ -50,16 +50,6 @@ static void fill_quad_arrays(void) {
                 {{ tile_p1.x, tile_p0.y }}
             }};
 
-            color_quads[i] = (color_quad_t){{
-                {{ tile_p0.x, tile_p0.y, 0 }},
-                {{ tile_p0.x, tile_p0.y, 0 }},
-                {{ tile_p0.x, tile_p0.y, 0 }},
-                //
-                {{ tile_p0.x, tile_p0.y, 0 }},
-                {{ tile_p0.x, tile_p0.y, 0 }},
-                {{ tile_p0.x, tile_p0.y, 0 }}
-            }};
-            
             i++;
         }
     }
@@ -74,10 +64,12 @@ void gfx_init(void) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(pos_quads), pos_quads, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers.color);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(color_quads), color_quads, GL_STATIC_DRAW);
+    glBufferStorage(GL_ARRAY_BUFFER, sizeof(color_quads), NULL, GL_DYNAMIC_STORAGE_BIT);
 }
 
 void gfx_update(void) {
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(color_quads), color_quads);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnableVertexAttribArray(0);
@@ -92,4 +84,16 @@ void gfx_update(void) {
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
+}
+
+void set_tile_to_color(size_t index, vec3s color) {
+    color_quads[index] = (color_quad_t){{
+        color,
+        color,
+        color,
+        //
+        color,
+        color,
+        color
+    }};
 }

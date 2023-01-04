@@ -5,4 +5,4 @@
 void gfx_init(void);
 void gfx_update(void);
 
-void set_tile_to_color(vec3s color);
+void set_tile_to_color(size_t index, vec3s color);
