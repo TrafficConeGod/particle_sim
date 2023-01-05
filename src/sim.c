@@ -121,7 +121,7 @@ static void handle_sand(size_t index, bitfield_t tile_type_bitfield) {
         // Move left or right randomly
         move_to += rand() % 2 ? -1 : 1;
         // Check if we are in bounds or if we are colliding with something else
-        if (catch_index(move_to) || get_tile_type(tile_types[move_to]) > tile_type_air) {
+        if (catch_index(move_to) || get_tile_type(tile_types[move_to]) > tile_type_water) {
             tile_types[index] = toggle_processed_flag(tile_type_bitfield);
             return;
         }
