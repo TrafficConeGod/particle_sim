@@ -45,8 +45,7 @@ static bool catch_index(size_t index) {
 }
 
 static bool catch_horizontal_move(size_t index, int dir) {
-    // This will also catch out of bounds as well
-    return (int)((index % TILEMAP_WIDTH) - ((index - dir) % TILEMAP_WIDTH)) != dir;
+    return catch_index(index) || (int)((index % TILEMAP_WIDTH) - ((index - dir) % TILEMAP_WIDTH)) != dir;
 }
 
 static void key_callback(UNUSED GLFWwindow* _0, int key, UNUSED int _1, UNUSED int _2, UNUSED int _3) {
@@ -193,31 +192,30 @@ void sim_update(float width_norm_factor, float height_norm_factor, GLFWwindow* w
     bool mouse_button_1_pressed = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
     bool mouse_button_2_pressed = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
     if (mouse_button_1_pressed || mouse_button_2_pressed) {
+        tile_type_t tile_type_to_place = mouse_button_1_pressed ? current_tile_type : tile_type_air;
+
         double cursor_x;
         double cursor_y;
         glfwGetCursorPos(win, &cursor_x, &cursor_y);
         vec2s cursor_pos = {{ (float)cursor_x * width_norm_factor * (float)TILEMAP_WIDTH, (1.0f - ((float)cursor_y * height_norm_factor)) * (float)TILEMAP_HEIGHT }};
         size_t cursor_x_floor = cursor_pos.x;
         size_t cursor_y_floor = cursor_pos.y;
-        // Place at most 5 tiles
-        for (size_t i = 0; i < 5; i++) {
-            // Randomized position
-            size_t index = ((cursor_y_floor + rand_range(0, 6) - 3) * TILEMAP_WIDTH);
-            // Check if we are in bounds
-            if (catch_index(index)) {
-                continue;
-            }
-            int dir = (cursor_x_floor + rand_range(0, 6) - 3);
-            index += dir;
-            // Check if we are in bounds horizontally
-            if (catch_horizontal_move(index, dir)) {
-                continue;
-            }
+        // Place tiles in r = 10 circle
+        for (int y = -10; y <= 10; y++) {
+            for (int x = -10; x <= 10; x++) {
+                // Check if we are in the circle
+                if (x*x + y*y >= 100) {
+                    continue;
+                }
 
-            // Spawn current tile type if we press mouse button 1, delete tile if we press mouse button 2
-            tile_type_t tile_type_to_place = mouse_button_1_pressed ? current_tile_type : tile_type_air;
-            tile_types[index] = get_processed_tile_type_bitfield(tile_type_to_place);
-            pixel_colors[index] = get_tile_color(tile_type_to_place);
+                size_t index = cursor_x_floor + x + ((cursor_y_floor + y) * TILEMAP_WIDTH);
+                // Check if we are in bounds
+                if (catch_horizontal_move(index, x)) {
+                    continue;
+                }
+                tile_types[index] = get_processed_tile_type_bitfield(tile_type_to_place);
+                pixel_colors[index] = get_tile_color(tile_type_to_place);
+            }
         }
     }
 
