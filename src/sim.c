@@ -44,6 +44,11 @@ static bool catch_index(size_t index) {
     return index >= NUM_TILES;
 }
 
+static bool catch_horizontal_move(size_t index, int dir) {
+    // This will also catch out of bounds as well
+    return (int)((index % TILEMAP_WIDTH) - ((index - dir) % TILEMAP_WIDTH)) != dir;
+}
+
 static void key_callback(UNUSED GLFWwindow* _0, int key, UNUSED int _1, UNUSED int _2, UNUSED int _3) {
     tile_type_t tile_type = (key - GLFW_KEY_1) + 1;
     if (tile_type > MAX_TILE_TYPE) {
@@ -93,7 +98,7 @@ static void handle_water(size_t index, bitfield_t tile_type_bitfield) {
         // Move left or right randomly
         move_to = index + dir;
         // Check if we are in bounds or if we are colliding with something else
-        if (catch_index(move_to) || get_tile_type(tile_types[move_to]) != tile_type_air) {
+        if (catch_horizontal_move(move_to, dir) || get_tile_type(tile_types[move_to]) != tile_type_air) {
             tile_types[index] = toggle_processed_flag(tile_type_bitfield);
             return;
         }
@@ -118,10 +123,11 @@ static void handle_sand(size_t index, bitfield_t tile_type_bitfield) {
     }
     // Check if we are colliding with something else
     if (get_tile_type(tile_types[move_to]) > tile_type_water) {
+        int dir = rand() % 2 ? -1 : 1;
         // Move left or right randomly
-        move_to += rand() % 2 ? -1 : 1;
+        move_to += dir;
         // Check if we are in bounds or if we are colliding with something else
-        if (catch_index(move_to) || get_tile_type(tile_types[move_to]) > tile_type_water) {
+        if (catch_horizontal_move(move_to, dir) || get_tile_type(tile_types[move_to]) > tile_type_water) {
             tile_types[index] = toggle_processed_flag(tile_type_bitfield);
             return;
         }
@@ -197,11 +203,18 @@ void sim_update(float width_norm_factor, float height_norm_factor, GLFWwindow* w
         // Place at most 5 tiles
         for (size_t i = 0; i < 5; i++) {
             // Randomized position
-            size_t index = (cursor_x_floor + rand_range(0, 6) - 3) + ((cursor_y_floor + rand_range(0, 6) - 3) * TILEMAP_WIDTH);
+            size_t index = ((cursor_y_floor + rand_range(0, 6) - 3) * TILEMAP_WIDTH);
             // Check if we are in bounds
             if (catch_index(index)) {
                 continue;
             }
+            int dir = (cursor_x_floor + rand_range(0, 6) - 3);
+            index += dir;
+            // Check if we are in bounds horizontally
+            if (catch_horizontal_move(index, dir)) {
+                continue;
+            }
+
             // Spawn current tile type if we press mouse button 1, delete tile if we press mouse button 2
             tile_type_t tile_type_to_place = mouse_button_1_pressed ? current_tile_type : tile_type_air;
             tile_types[index] = get_processed_tile_type_bitfield(tile_type_to_place);
