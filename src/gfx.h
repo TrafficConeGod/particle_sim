@@ -5,8 +5,6 @@
 #include <bits/types/error_t.h>
 #include <assert.h>
 
-// TODO: Figure out a way to make sure pixel copy ops avoid >1 cache miss
-
 typedef struct color {
     _Alignas(4) uint8_t r;
     uint8_t g;
