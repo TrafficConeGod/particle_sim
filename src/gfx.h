@@ -8,12 +8,12 @@
 // TODO: Figure out a way to make sure pixel copy ops avoid >1 cache miss
 
 typedef struct color {
-    uint8_t r;
+    _Alignas(4) uint8_t r;
     uint8_t g;
     uint8_t b;
 } color_t;
 
-_Static_assert(sizeof(color_t) == 3, "color_t must be 3 bytes");
+_Static_assert(sizeof(color_t) == 4, "color_t must be 4 bytes");
 
 extern color_t pixel_colors[NUM_TILES];
 

@@ -50,7 +50,7 @@ error_t gfx_init(void) {
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, TILEMAP_WIDTH, TILEMAP_HEIGHT);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, TILEMAP_WIDTH, TILEMAP_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, pixel_colors);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, TILEMAP_WIDTH, TILEMAP_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, pixel_colors);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -72,7 +72,7 @@ error_t gfx_init(void) {
 }
 
 void gfx_update(void) {
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, TILEMAP_WIDTH, TILEMAP_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, pixel_colors);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, TILEMAP_WIDTH, TILEMAP_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, pixel_colors);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
