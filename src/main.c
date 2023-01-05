@@ -31,8 +31,6 @@ int main() {
         goto error;
     }
 
-    // glfwSetInputMode(win, GLFW_STICKY_KEYS, GL_TRUE);
-
     if (gfx_init() != 0) {
         goto error;
     }
@@ -41,6 +39,7 @@ int main() {
     size_t tick_count = 0;
 
     for (;;) {
+        #ifdef TIMINGS
         clock_t begin_sim = clock();
         sim_update(1.0f/1280.0f, 1.0f/720.0f, win, tick_count);
         clock_t end_sim_begin_gfx = clock();
@@ -51,6 +50,10 @@ int main() {
         clock_t gfx_time = end_gfx - end_sim_begin_gfx;
         clock_t total_time = end_gfx - begin_sim;
         printf("%ld, %ld, %ld\n", sim_time, gfx_time, total_time);
+        #else
+        sim_update(1.0f/1280.0f, 1.0f/720.0f, win, tick_count);
+        gfx_update();
+        #endif
 
         tick_count++;
 

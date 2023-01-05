@@ -133,10 +133,9 @@ static void handle_sand(size_t index, bitfield_t tile_type_bitfield) {
         }
     }
     // Tile movement
-    tile_type_t replaced_tile_type = tile_types[move_to];
     color_t sand_color = pixel_colors[index];
 
-    tile_types[index] = get_processed_tile_type_bitfield(replaced_tile_type);
+    tile_types[index] = get_processed_tile_type_bitfield(tile_types[move_to]);
     tile_types[move_to] = toggle_processed_flag(tile_type_bitfield);
     pixel_colors[index] = pixel_colors[move_to];
     pixel_colors[move_to] = sand_color;
