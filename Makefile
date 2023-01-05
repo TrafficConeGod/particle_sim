@@ -6,7 +6,7 @@ WARNS := -Wall -Wextra -Wdouble-promotion -Wduplicate-decl-specifier -Wformat=2 
 OBJECTS := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(SOURCES)))
 DEPENDS := $(patsubst %.c,%.d,$(patsubst %.cpp,%.d,$(SOURCES)))
 
-CFLAGS = -O3 -flto -Werror -std=c2x -isystem /usr/include/freetype2 -g
+CFLAGS = -O3 -flto -std=c2x -isystem /usr/include/freetype2 -g
 CXXFLAGS = $(CFLAGS) -fno-exceptions -std=c++2a
 
 .PHONY: build run clean

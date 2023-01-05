@@ -1,5 +1,6 @@
 #pragma once
 #include "tilemap.h"
+#include "bitfield.h"
 #include <GL/glew.h>
 #include <cglm/struct/vec3.h>
 #include <bits/types/error_t.h>
@@ -15,7 +16,14 @@ typedef struct color {
 
 _Static_assert(sizeof(color_t) == 3, "color_t must be 3 bytes");
 
-extern color_t pixel_colors[NUM_TILES];
+typedef struct tile {
+    color_t color;
+    bitfield_t type;
+} tile_t;
+
+_Static_assert(sizeof(tile_t) == 4, "tile_t must be 4 bytes");
+
+extern tile_t tiles[NUM_TILES];
 
 error_t gfx_init(void);
 void gfx_update(void);

@@ -23,7 +23,7 @@ _Alignas(64) static vec2s uv_verts[] = {
     {{ 1, 0 }}
 };
 
-_Alignas(64) color_t pixel_colors[NUM_TILES] = {0};
+_Alignas(64) tile_t tiles[NUM_TILES] = {0};
 
 static union {
     GLuint data[2];
@@ -50,7 +50,7 @@ error_t gfx_init(void) {
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, TILEMAP_WIDTH, TILEMAP_HEIGHT);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, TILEMAP_WIDTH, TILEMAP_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, pixel_colors);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, TILEMAP_WIDTH, TILEMAP_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, tiles);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -72,7 +72,7 @@ error_t gfx_init(void) {
 }
 
 void gfx_update(void) {
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, TILEMAP_WIDTH, TILEMAP_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, pixel_colors);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, TILEMAP_WIDTH, TILEMAP_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, tiles);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -88,8 +88,4 @@ void gfx_update(void) {
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
-}
-
-void set_tile_to_color(size_t index, color_t color) {
-    pixel_colors[index] = color;
 }
