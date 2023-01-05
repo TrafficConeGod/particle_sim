@@ -80,12 +80,8 @@ static void handle_water(size_t index, bitfield_t tile_type_bitfield) {
         move_to = index + dir;
         // Check if we are in bounds or if we are colliding with something else
         if (catch_index(move_to) || get_tile_type(tile_types[move_to]) != tile_type_air) {
-            move_to = index - dir;
-            // Check if we are in bounds or if we are colliding with something else
-            if (catch_index(move_to) || get_tile_type(tile_types[move_to]) != tile_type_air) {
-                tile_types[index] = toggle_processed_flag(tile_type_bitfield);
-                return;
-            }
+            tile_types[index] = toggle_processed_flag(tile_type_bitfield);
+            return;
         }
     }
     // Tile movement
