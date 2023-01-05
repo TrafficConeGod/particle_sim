@@ -56,13 +56,27 @@ void sim_init(GLFWwindow* win) {
     glfwSetKeyCallback(win, key_callback);
 }
 
+_Alignas(64) static color_t sand_colors[] = {
+    { 176, 133, 23 },
+    { 194, 154, 52 },
+    { 209, 178, 100 },
+    { 217, 198, 150 }
+};
+
+_Alignas(64) static color_t stone_colors[] = {
+    { 76, 79, 79 },
+    { 76, 84, 84 },
+    { 101, 107, 107 },
+    { 134, 145, 145 }
+};
+
 static color_t get_tile_color(tile_type_t tile_type) {
     switch (tile_type) {
         default: return (color_t){ 255, 0, 0 };
         case tile_type_air: return (color_t){ 0, 0, 0 };
         case tile_type_water: return (color_t){ 66, 135, 245 };
-        case tile_type_sand: return (color_t){ 194, 154, 52 };
-        case tile_type_stone: return (color_t){ 76, 79, 79 };
+        case tile_type_sand: return sand_colors[rand_range(0, SIZEOF_ARRAY(sand_colors) - 1)];
+        case tile_type_stone: return stone_colors[rand_range(0, SIZEOF_ARRAY(stone_colors) - 1)];
         case tile_type_acid: return (color_t){ 255, 0, 255 };
     }
 }
@@ -114,12 +128,12 @@ static void handle_sand(size_t index, bitfield_t tile_type_bitfield) {
     }
     // Tile movement
     tile_type_t replaced_tile_type = tile_types[move_to];
-    color_t replaced_color = pixel_colors[move_to];
+    color_t sand_color = pixel_colors[index];
 
     tile_types[index] = get_processed_tile_type_bitfield(replaced_tile_type);
     tile_types[move_to] = toggle_processed_flag(tile_type_bitfield);
-    pixel_colors[index] = replaced_color;
-    pixel_colors[move_to] = get_tile_color(tile_type_sand);
+    pixel_colors[index] = pixel_colors[move_to];
+    pixel_colors[move_to] = sand_color;
 }
 
 static void spread_acid(size_t index, bitfield_t tile_type_bitfield) {
