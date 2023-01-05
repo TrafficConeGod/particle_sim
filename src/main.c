@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <stdbool.h>
+#include <time.h>
 
 int main() {
     // Init GLFW
@@ -40,8 +41,16 @@ int main() {
     size_t tick_count = 0;
 
     for (;;) {
+        clock_t begin_sim = clock();
         sim_update(1.0f/1280.0f, 1.0f/720.0f, win, tick_count);
+        clock_t end_sim_begin_gfx = clock();
         gfx_update();
+        clock_t end_gfx = clock();
+        
+        clock_t sim_time = end_sim_begin_gfx - begin_sim;
+        clock_t gfx_time = end_gfx - end_sim_begin_gfx;
+        clock_t total_time = end_gfx - begin_sim;
+        printf("%ld, %ld, %ld\n", sim_time, gfx_time, total_time);
 
         tick_count++;
 
